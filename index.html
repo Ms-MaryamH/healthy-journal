@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Healthy Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f5f0e8;
+    color: #2C2C2A;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  .canvas {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── PAGE CARD ── */
+  .page {
+    background: #fff;
+    border-radius: 18px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 0.5px solid #D3D1C7;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: #1D9E75;
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-circles {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 220px; pointer-events: none;
+  }
+  .cover-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .cover-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 32px;
+  }
+  .cover-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .cover-field {
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .cover-field label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .cover-field input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.45);
+    outline: none;
+    width: 100%;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 4px 0;
+  }
+  .cover-field input::placeholder { color: rgba(255,255,255,0.4); }
+  .cover-quote {
+    position: absolute;
+    bottom: 20px;
+    right: 32px;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    background: #F1EFE8;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 0.5px solid #D3D1C7;
+  }
+  .section-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500;
+    flex-shrink: 0;
+  }
+  .num-green  { background: #9FE1CB; color: #085041; }
+  .num-amber  { background: #FAC775; color: #633806; }
+  .num-purple { background: #CECBF6; color: #3C3489; }
+  .section-title { font-size: 15px; font-weight: 500; color: #2C2C2A; }
+  .section-sub   { font-size: 12px; color: #888780; margin-top: 2px; }
+
+  /* ── SECTION BODY ── */
+  .section-body { padding: 22px 28px; }
+
+  /* ── TRAIT TABLE ── */
+  .col-labels {
+    display: grid;
+    grid-template-columns: 2fr 40px 2fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .col-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: #888780;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 4px;
+  }
+  .trait-rows { display: flex; flex-direction: column; gap: 10px; }
+  .trait-row {
+    display: grid;
+    grid-template-columns: 2fr 40px 2fr;
+    gap: 10px;
+    align-items: center;
+  }
+  .trait-input {
+    border: 0.5px solid #D3D1C7;
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: #2C2C2A;
+    background: #FAFAF8;
+    min-height: 46px;
+    width: 100%;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+    overflow: hidden;
+  }
+  .trait-input:focus { border-color: #1D9E75; background: #fff; }
+  .trait-input.example { background: #F1EFE8; }
+  .trait-input.example:focus { border-color: #1D9E75; background: #fff; }
+  .arrow-col {
+    display: flex; align-items: center; justify-content: center;
+    color: #B4B2A9;
+  }
+
+  /* ── RENAME SECTION ── */
+  .example-box {
+    background: #FAEEDA;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+  }
+  .example-box-title {
+    font-size: 10px; font-weight: 500; color: #854F0B;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .rename-pairs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .rename-pair {
+    background: #fff; border-radius: 8px;
+    padding: 9px 12px; border: 0.5px solid #EF9F27;
+  }
+  .rename-pair .from { font-size: 11px; color: #888780; margin-bottom: 2px; }
+  .rename-pair .to   { font-size: 12px; font-weight: 500; color: #854F0B; }
+
+  .checklist-label {
+    font-size: 10px; font-weight: 500; color: #888780;
+    text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;
+  }
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 18px;
+  }
+  .skill-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border: 0.5px solid #D3D1C7; border-radius: 8px;
+    background: #FAFAF8; cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    user-select: none;
+  }
+  .skill-item:hover { background: #F1EFE8; }
+  .skill-item.checked { background: #E1F5EE; border-color: #5DCAA5; }
+  .skill-check {
+    width: 16px; height: 16px;
+    border: 1.5px solid #B4B2A9; border-radius: 4px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .skill-item.checked .skill-check {
+    background: #1D9E75; border-color: #1D9E75;
+  }
+  .skill-item.checked .skill-check::after {
+    content: '';
+    display: block;
+    width: 8px; height: 5px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .skill-name { font-size: 12px; color: #444441; }
+
+  .top3-label { font-size: 12px; color: #888780; margin-bottom: 10px; }
+  .top3-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
+  .top3-input {
+    border: 0.5px solid #D3D1C7; border-radius: 10px;
+    padding: 12px 13px; font-size: 13px;
+    font-family: 'DM Sans', sans-serif; color: #2C2C2A;
+    background: #FAFAF8; min-height: 48px;
+    width: 100%; outline: none; resize: none;
+    transition: border-color 0.15s;
+  }
+  .top3-input:focus { border-color: #EF9F27; background: #fff; }
+
+  /* ── INSIGHT CARDS ── */
+  .insight-cards { display: flex; flex-direction: column; gap: 12px; }
+  .insight-card {
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .ic-surprise { background: #FAEEDA; border: 0.5px solid #EF9F27; }
+  .ic-sense    { background: #E1F5EE; border: 0.5px solid #5DCAA5; }
+  .ic-plan     { background: #EEEDFE; border: 0.5px solid #AFA9EC; }
+  .ic-new1     { background: #FAECE7; border: 0.5px solid #F0997B; }
+  .ic-new2     { background: #E6F1FB; border: 0.5px solid #85B7EB; }
+  .insight-q {
+    font-size: 10.5px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 4px;
+  }
+  .iq-amber  { color: #854F0B; }
+  .iq-green  { color: #0F6E56; }
+  .iq-purple { color: #534AB7; }
+  .iq-coral  { color: #993C1D; }
+  .iq-blue   { color: #185FA5; }
+  .insight-prompt { font-size: 12px; margin-bottom: 10px; }
+  .ic-surprise .insight-prompt { color: #854F0B; }
+  .ic-sense    .insight-prompt { color: #0F6E56; }
+  .ic-plan     .insight-prompt { color: #534AB7; }
+  .ic-new1     .insight-prompt { color: #993C1D; }
+  .ic-new2     .insight-prompt { color: #185FA5; }
+  .insight-textarea {
+    width: 100%; min-height: 64px;
+    border: none; border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px; font-family: 'DM Sans', sans-serif;
+    color: #2C2C2A; resize: vertical; outline: none;
+    background: rgba(255,255,255,0.7);
+    transition: background 0.15s;
+  }
+  .insight-textarea:focus { background: #fff; }
+
+  /* ── CLOSING PAGE ── */
+  .closing {
+    background: #26215C;
+    padding: 32px 36px;
+    border-radius: 0 0 16px 16px;
+  }
+  .closing-label {
+    font-size: 10px; font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px;
+  }
+  .closing-stat-row { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 8px; }
+  .closing-big { font-family: 'Playfair Display', serif; font-size: 56px; color: #AFA9EC; line-height: 1; }
+  .closing-pct { font-size: 24px; color: #AFA9EC; margin-bottom: 10px; }
+  .closing-text { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.65; max-width: 500px; margin-bottom: 22px; }
+  .closing-quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; font-size: 17px; color: #7F77DD;
+    border-left: 2px solid #534AB7; padding-left: 16px; line-height: 1.5;
+  }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-area {
+    max-width: 760px; margin: 0 auto;
+    padding: 0 20px 20px;
+    text-align: center;
+  }
+  .submit-note {
+    font-size: 12px; color: #888780; margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .submit-btn {
+    background: #1D9E75; color: #fff;
+    border: none; border-radius: 12px;
+    padding: 14px 40px; font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .submit-btn:hover { background: #0F6E56; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 560px) {
+    .cover-fields { grid-template-columns: 1fr; }
+    .skills-grid  { grid-template-columns: repeat(2, 1fr); }
+    .top3-grid    { grid-template-columns: 1fr; }
+    .rename-pairs { grid-template-columns: 1fr; }
+    .col-labels, .trait-row { grid-template-columns: 1fr 28px 1fr; }
+    .cover-title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- ══ COVER ══════════════════════════════════════════════════════════ -->
+  <div class="page">
+    <div class="cover">
+      <svg class="cover-circles" viewBox="0 0 220 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="170" cy="60"  r="90"  fill="white"/>
+        <circle cx="60"  cy="230" r="65"  fill="white"/>
+        <circle cx="190" cy="350" r="55"  fill="white"/>
+      </svg>
+      <div class="cover-tag">Personal Development</div>
+      <div class="cover-title">My Healthy<br>Journal</div>
+      <div class="cover-sub">Discovering your transferable self</div>
+      <div class="cover-fields">
+        <div class="cover-field">
+          <label for="student-name">Student name</label>
+          <input type="text" id="student-name" placeholder="Your full name" autocomplete="name">
+        </div>
+        <div class="cover-field">
+          <label for="student-date">Date</label>
+          <input type="date" id="student-date">
+        </div>
+        <div class="cover-field">
+          <label for="student-class">Class / Section</label>
+          <input type="text" id="student-class" placeholder="e.g. Grade 10 B">
+        </div>
+        <div class="cover-field">
+          <label for="top-skill">My top skill today</label>
+          <input type="text" id="top-skill" placeholder="e.g. Active Listening">
+        </div>
+      </div>
+      <div class="cover-quote">"You are not starting from scratch."</div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 1: STRENGTH JOURNAL ══════════════════════════════════ -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-green">1</div>
+      <div>
+        <div class="section-title">My strength journal</div>
+        <div class="section-sub">List 6–8 positive traits you genuinely believe you have, with a real-life example for each</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="col-labels">
+        <div class="col-label">My personal trait</div>
+        <div></div>
+        <div class="col-label">A real moment I used it</div>
+      </div>
+      <div class="trait-rows" id="trait-rows">
+
+        <div class="trait-row">
+          <textarea class="trait-input" placeholder="e.g. I stay calm when things go wrong" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" placeholder="When our group project fell apart, I helped reorganise everyone…" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" placeholder="e.g. I listen without interrupting" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" placeholder="My friend was upset and I sat with them and really heard them out…" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="trait-row">
+          <textarea class="trait-input" rows="2" oninput="autoResize(this)"></textarea>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <textarea class="trait-input example" rows="2" oninput="autoResize(this)"></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 2: RENAME GAME ════════════════════════════════════════ -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-amber">2</div>
+      <div>
+        <div class="section-title">The rename game</div>
+        <div class="section-sub">Match each trait to its professional title — tick all that apply to you</div>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="example-box">
+        <div class="example-box-title">Example translations</div>
+        <div class="rename-pairs">
+          <div class="rename-pair"><div class="from">I stay calm in drama</div><div class="to">Conflict resolution</div></div>
+          <div class="rename-pair"><div class="from">I notice small details</div><div class="to">Attention to detail</div></div>
+          <div class="rename-pair"><div class="from">I come up with ideas</div><div class="to">Creative thinking</div></div>
+          <div class="rename-pair"><div class="from">I keep people together</div><div class="to">Team cohesion</div></div>
+        </div>
+      </div>
+
+      <div class="checklist-label">Transferable skills checklist — tick everything that applies to you</div>
+      <div class="skills-grid" id="skills-grid">
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Active listening</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Adaptability</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Attention to detail</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Conflict resolution</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Creative thinking</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Critical thinking</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Decision making</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Emotional intelligence</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Initiative</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Leadership</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Negotiation</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Organisation</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Persuasion</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Problem solving</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Public speaking</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Research skills</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Self-management</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Team cohesion</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Time management</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Written communication</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Verbal communication</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Resilience</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Mentoring others</span></div>
+        <div class="skill-item" onclick="toggleSkill(this)"><div class="skill-check"></div><span class="skill-name">Cultural awareness</span></div>
+      </div>
+
+      <div class="top3-label">My top 3 professional skill titles (write them here):</div>
+      <div class="top3-grid">
+        <textarea class="top3-input" placeholder="Skill 1" rows="2" oninput="autoResize(this)"></textarea>
+        <textarea class="top3-input" placeholder="Skill 2" rows="2" oninput="autoResize(this)"></textarea>
+        <textarea class="top3-input" placeholder="Skill 3" rows="2" oninput="autoResize(this)"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SECTION 3: 5 INSIGHTS ═════════════════════════════════════════ -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-purple">3</div>
+      <div>
+        <div class="section-title">5 new things I learned about myself today</div>
+        <div class="section-sub">Answer each prompt honestly — there are no wrong answers</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="insight-cards">
+
+        <div class="insight-card ic-surprise">
+          <div class="insight-q iq-amber">What surprised you?</div>
+          <div class="insight-prompt">A skill I never thought I had is…</div>
+          <textarea class="insight-textarea" placeholder="Write your answer here…" rows="3" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="insight-card ic-sense">
+          <div class="insight-q iq-green">What made total sense?</div>
+          <div class="insight-prompt">It totally confirmed for me that I am…</div>
+          <textarea class="insight-textarea" placeholder="Write your answer here…" rows="3" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="insight-card ic-plan">
+          <div class="insight-q iq-purple">What is your plan?</div>
+          <div class="insight-prompt">A skill I want to build is _______ because…</div>
+          <textarea class="insight-textarea" placeholder="Write your answer here…" rows="3" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="insight-card ic-new1">
+          <div class="insight-q iq-coral">New thing #4</div>
+          <div class="insight-prompt">Something I want people to know about me is…</div>
+          <textarea class="insight-textarea" placeholder="Write your answer here…" rows="3" oninput="autoResize(this)"></textarea>
+        </div>
+
+        <div class="insight-card ic-new2">
+          <div class="insight-q iq-blue">New thing #5</div>
+          <div class="insight-prompt">One skill I already have that workplaces value is…</div>
+          <textarea class="insight-textarea" placeholder="Write your answer here…" rows="3" oninput="autoResize(this)"></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CLOSING TAKEAWAY ══════════════════════════════════════════════ -->
+  <div class="page">
+    <div class="closing">
+      <div class="closing-label">Today's closing takeaway</div>
+      <div class="closing-stat-row">
+        <div class="closing-big">92</div>
+        <div class="closing-pct">%</div>
+      </div>
+      <div class="closing-text">of hiring managers say soft skills are equally or more important than technical skills — and every single thing you wrote in this journal today is a soft skill an employer is actively looking for.</div>
+      <div class="closing-quote">You are not starting from scratch.<br>You are starting from experience.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ SUBMIT AREA ══════════════════════════════════════════════════════ -->
+<div class="submit-area">
+  <div class="submit-note">When you have completed all sections, click the button below to copy your answers and paste them into the Google Form shared by your teacher.</div>
+  <button class="submit-btn" onclick="copyAnswers()">Copy my answers to submit</button>
+  <div id="copy-confirm" style="margin-top:12px;font-size:13px;color:#1D9E75;display:none;">Answers copied! Now paste them into the Google Form.</div>
+</div>
+
+<script>
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function toggleSkill(el) {
+    el.classList.toggle('checked');
+  }
+
+  function copyAnswers() {
+    var name   = document.getElementById('student-name').value || '(not filled)';
+    var date   = document.getElementById('student-date').value || '(not filled)';
+    var cls    = document.getElementById('student-class').value || '(not filled)';
+    var topsk  = document.getElementById('top-skill').value || '(not filled)';
+
+    var traitAreas = document.querySelectorAll('#trait-rows .trait-input');
+    var traits = '';
+    for (var i = 0; i < traitAreas.length; i += 2) {
+      var t = (traitAreas[i].value || '').trim();
+      var e = (traitAreas[i+1] ? traitAreas[i+1].value || '' : '').trim();
+      if (t || e) traits += '  Trait: ' + t + '\n  Example: ' + e + '\n';
+    }
+
+    var checkedSkills = [];
+    document.querySelectorAll('.skill-item.checked .skill-name').forEach(function(el) {
+      checkedSkills.push(el.textContent);
+    });
+
+    var top3 = [];
+    document.querySelectorAll('.top3-input').forEach(function(el) {
+      if (el.value.trim()) top3.push(el.value.trim());
+    });
+
+    var insights = [];
+    document.querySelectorAll('.insight-textarea').forEach(function(el) {
+      insights.push(el.value.trim() || '(not answered)');
+    });
+
+    var output =
+      '=== MY HEALTHY JOURNAL SUBMISSION ===\n\n' +
+      'Name: ' + name + '\n' +
+      'Date: ' + date + '\n' +
+      'Class: ' + cls + '\n' +
+      'Top skill today: ' + topsk + '\n\n' +
+      '--- SECTION 1: MY STRENGTHS ---\n' + (traits || '(not filled)\n') + '\n' +
+      '--- SECTION 2: TRANSFERABLE SKILLS TICKED ---\n' +
+      (checkedSkills.length ? checkedSkills.join(', ') : '(none ticked)') + '\n\n' +
+      'Top 3 professional titles:\n' +
+      (top3.length ? top3.map(function(s,i){return (i+1)+'. '+s;}).join('\n') : '(not filled)') + '\n\n' +
+      '--- SECTION 3: 5 INSIGHTS ---\n' +
+      '1. What surprised me: ' + insights[0] + '\n' +
+      '2. What made sense: ' + insights[1] + '\n' +
+      '3. My plan: ' + insights[2] + '\n' +
+      '4. New thing #4: ' + insights[3] + '\n' +
+      '5. New thing #5: ' + insights[4] + '\n';
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(output).then(function() {
+        document.getElementById('copy-confirm').style.display = 'block';
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = output;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      document.getElementById('copy-confirm').style.display = 'block';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('student-date').value = today;
+  });
+</script>
+
+</body>
+</html>
