@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#f5f0e8;color:#2C2C2A;}
+
+.canvas{max-width:720px;margin:0 auto;padding:24px 16px 40px;}
+
+.page{background:#fff;border-radius:16px;margin-bottom:24px;overflow:hidden;border:0.5px solid #D3D1C7;}
+
+.cover{background:#1D9E75;padding:48px 40px 40px;position:relative;}
+.cover-pattern{position:absolute;top:0;right:0;bottom:0;width:200px;opacity:0.08;}
+.cover-tag{display:inline-block;background:rgba(255,255,255,0.18);color:#fff;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px;}
+.cover-title{font-family:'Playfair Display',serif;font-size:34px;color:#fff;line-height:1.15;margin-bottom:8px;}
+.cover-sub{font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:32px;}
+.cover-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cover-field{background:rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px;}
+.cover-field label{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:6px;}
+.cover-field .line{height:1px;background:rgba(255,255,255,0.4);margin-top:4px;}
+.cover-deco{position:absolute;bottom:24px;right:32px;font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:rgba(255,255,255,0.45);}
+
+.section-header{background:#F1EFE8;padding:14px 28px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid #D3D1C7;}
+.section-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
+.num-green{background:#9FE1CB;color:#085041;}
+.num-blue{background:#B5D4F4;color:#0C447C;}
+.num-amber{background:#FAC775;color:#633806;}
+.num-purple{background:#CECBF6;color:#3C3489;}
+.num-coral{background:#F5C4B3;color:#712B13;}
+.section-title{font-size:14px;font-weight:500;color:#2C2C2A;}
+.section-sub{font-size:12px;color:#888780;margin-top:1px;}
+
+.section-body{padding:20px 28px;}
+
+.trait-rows{display:flex;flex-direction:column;gap:12px;}
+.trait-row{display:grid;grid-template-columns:2fr 1fr 2fr;gap:10px;align-items:start;}
+.trait-row-header{display:grid;grid-template-columns:2fr 1fr 2fr;gap:10px;margin-bottom:6px;}
+.col-label{font-size:10px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.08em;padding:0 12px;}
+.arrow-col{display:flex;align-items:center;justify-content:center;padding-top:10px;}
+.arrow-svg{width:20px;height:20px;color:#B4B2A9;}
+.trait-input{border:0.5px solid #D3D1C7;border-radius:10px;padding:10px 12px;font-size:13px;color:#2C2C2A;min-height:44px;background:#FAFAF8;}
+.trait-input.example{background:#F1EFE8;border-color:#B4B2A9;}
+.trait-input .placeholder-text{color:#B4B2A9;font-style:italic;}
+.trait-input .skill-tag{display:inline-block;background:#E1F5EE;color:#0F6E56;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+
+.rename-box{background:#FAEEDA;border-radius:12px;padding:16px 20px;margin-bottom:16px;}
+.rename-box-title{font-size:11px;font-weight:500;color:#854F0B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+.rename-pairs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rename-pair{background:#fff;border-radius:8px;padding:9px 12px;border:0.5px solid #EF9F27;}
+.rename-pair .from{font-size:11px;color:#888780;margin-bottom:3px;}
+.rename-pair .to{font-size:12px;font-weight:500;color:#854F0B;}
+
+.skills-checklist{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;}
+.skill-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border:0.5px solid #D3D1C7;border-radius:8px;background:#FAFAF8;}
+.skill-check{width:16px;height:16px;border:1.5px solid #B4B2A9;border-radius:4px;flex-shrink:0;}
+.skill-check.checked{background:#1D9E75;border-color:#1D9E75;display:flex;align-items:center;justify-content:center;}
+.skill-check.checked::after{content:'';display:block;width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);}
+.skill-name{font-size:11.5px;color:#444441;}
+
+.insight-cards{display:flex;flex-direction:column;gap:10px;}
+.insight-card{border-radius:12px;padding:14px 16px;}
+.ic-surprise{background:#FAEEDA;border:0.5px solid #EF9F27;}
+.ic-sense{background:#E1F5EE;border:0.5px solid #5DCAA5;}
+.ic-plan{background:#EEEDFE;border:0.5px solid #AFA9EC;}
+.ic-new1{background:#FAECE7;border:0.5px solid #F0997B;}
+.ic-new2{background:#E6F1FB;border:0.5px solid #85B7EB;}
+.insight-q{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:8px;}
+.iq-amber{color:#854F0B;}
+.iq-green{color:#0F6E56;}
+.iq-purple{color:#534AB7;}
+.iq-coral{color:#993C1D;}
+.iq-blue{color:#185FA5;}
+.insight-lines{display:flex;flex-direction:column;gap:6px;}
+.insight-line{height:1px;background:rgba(0,0,0,0.12);border-radius:1px;}
+
+.takeaway-footer{background:#26215C;padding:28px 28px 24px;border-radius:0 0 14px 14px;}
+.takeaway-label{font-size:10px;font-weight:500;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;}
+.takeaway-stat-row{display:flex;align-items:flex-end;gap:4px;margin-bottom:6px;}
+.takeaway-big{font-family:'Playfair Display',serif;font-size:52px;color:#AFA9EC;line-height:1;}
+.takeaway-pct{font-size:22px;color:#AFA9EC;margin-bottom:8px;}
+.takeaway-text{font-size:14px;color:rgba(255,255,255,0.85);line-height:1.6;max-width:480px;margin-bottom:20px;}
+.takeaway-quote{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#7F77DD;border-left:2px solid #534AB7;padding-left:14px;line-height:1.5;}
+</style>
+
+<div class="canvas">
+
+  <!-- COVER PAGE -->
+  <div class="page">
+    <div class="cover">
+      <svg class="cover-pattern" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="160" cy="60" r="80" fill="white"/>
+        <circle cx="60" cy="220" r="60" fill="white"/>
+        <circle cx="180" cy="340" r="50" fill="white"/>
+      </svg>
+      <div class="cover-tag">Personal Development</div>
+      <div class="cover-title">My Healthy<br>Journal</div>
+      <div class="cover-sub">Discovering your transferable self</div>
+      <div class="cover-fields">
+        <div class="cover-field">
+          <label>Student name</label>
+          <div class="line"></div>
+        </div>
+        <div class="cover-field">
+          <label>Date</label>
+          <div class="line"></div>
+        </div>
+        <div class="cover-field">
+          <label>Class / Section</label>
+          <div class="line"></div>
+        </div>
+        <div class="cover-field">
+          <label>My top skill today</label>
+          <div class="line"></div>
+        </div>
+      </div>
+      <div class="cover-deco">"You are not starting from scratch."</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: TRAIT JOURNAL -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-green">1</div>
+      <div>
+        <div class="section-title">My strength journal</div>
+        <div class="section-sub">List 6–8 positive traits you genuinely believe you have, with a real-life example for each</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="trait-row-header">
+        <div class="col-label">My personal trait</div>
+        <div></div>
+        <div class="col-label">A real moment I used it</div>
+      </div>
+      <div class="trait-rows">
+
+        <div class="trait-row">
+          <div class="trait-input"><div class="placeholder-text">e.g. I stay calm when things go wrong</div></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"><div class="placeholder-text">When our group project fell apart, I helped reorganise everyone...</div></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-input"></div>
+          <div class="arrow-col">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h12M11 5l5 5-5 5" stroke="#B4B2A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="trait-input example"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: THE RENAME GAME -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-amber">2</div>
+      <div>
+        <div class="section-title">The rename game</div>
+        <div class="section-sub">Match each trait to its professional title from the transferable skills checklist below</div>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="rename-box">
+        <div class="rename-box-title">Example translations</div>
+        <div class="rename-pairs">
+          <div class="rename-pair"><div class="from">I stay calm in drama</div><div class="to">Conflict resolution</div></div>
+          <div class="rename-pair"><div class="from">I notice small details</div><div class="to">Attention to detail</div></div>
+          <div class="rename-pair"><div class="from">I come up with ideas</div><div class="to">Creative thinking</div></div>
+          <div class="rename-pair"><div class="from">I keep people together</div><div class="to">Team cohesion</div></div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:10px;">Transferable skills checklist — tick what applies to you</div>
+      <div class="skills-checklist">
+        <div class="skill-item"><div class="skill-check checked"></div><span class="skill-name">Active listening</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Adaptability</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Attention to detail</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Conflict resolution</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Creative thinking</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Critical thinking</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Decision making</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Emotional intelligence</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Initiative</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Leadership</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Negotiation</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Organisation</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Persuasion</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Problem solving</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Public speaking</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Research skills</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Self-management</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Team cohesion</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Time management</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Written communication</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Verbal communication</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Resilience</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Mentoring others</span></div>
+        <div class="skill-item"><div class="skill-check"></div><span class="skill-name">Cultural awareness</span></div>
+      </div>
+
+      <div style="font-size:12px;color:#888780;margin-top:6px;">My top 3 professional skill titles (circle your favourites above, then write them here):</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
+        <div style="border:0.5px solid #D3D1C7;border-radius:10px;padding:12px 14px;background:#FAFAF8;min-height:44px;"></div>
+        <div style="border:0.5px solid #D3D1C7;border-radius:10px;padding:12px 14px;background:#FAFAF8;min-height:44px;"></div>
+        <div style="border:0.5px solid #D3D1C7;border-radius:10px;padding:12px 14px;background:#FAFAF8;min-height:44px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 3: 5 NEW INSIGHTS -->
+  <div class="page">
+    <div class="section-header">
+      <div class="section-num num-purple">3</div>
+      <div>
+        <div class="section-title">5 new things I learned about myself today</div>
+        <div class="section-sub">Answer each prompt honestly — there are no wrong answers</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="insight-cards">
+
+        <div class="insight-card ic-surprise">
+          <div class="insight-q iq-amber">What surprised you?</div>
+          <div style="font-size:12px;color:#854F0B;margin-bottom:8px;">A skill I never thought I had is...</div>
+          <div class="insight-lines"><div class="insight-line"></div><div class="insight-line"></div></div>
+        </div>
+
+        <div class="insight-card ic-sense">
+          <div class="insight-q iq-green">What made total sense?</div>
+          <div style="font-size:12px;color:#0F6E56;margin-bottom:8px;">It totally confirmed for me that I am...</div>
+          <div class="insight-lines"><div class="insight-line"></div><div class="insight-line"></div></div>
+        </div>
+
+        <div class="insight-card ic-plan">
+          <div class="insight-q iq-purple">What's your plan?</div>
+          <div style="font-size:12px;color:#534AB7;margin-bottom:8px;">A skill I want to build is ______ because...</div>
+          <div class="insight-lines"><div class="insight-line"></div><div class="insight-line"></div></div>
+        </div>
+
+        <div class="insight-card ic-new1">
+          <div class="insight-q iq-coral">New thing #4</div>
+          <div style="font-size:12px;color:#993C1D;margin-bottom:8px;">Something I want people to know about me is...</div>
+          <div class="insight-lines"><div class="insight-line"></div><div class="insight-line"></div></div>
+        </div>
+
+        <div class="insight-card ic-new2">
+          <div class="insight-q iq-blue">New thing #5</div>
+          <div style="font-size:12px;color:#185FA5;margin-bottom:8px;">One skill I already have that workplaces value is...</div>
+          <div class="insight-lines"><div class="insight-line"></div><div class="insight-line"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSING TAKEAWAY PAGE -->
+  <div class="page">
+    <div class="takeaway-footer" style="border-radius:14px;">
+      <div class="takeaway-label">Today's closing takeaway</div>
+      <div class="takeaway-stat-row">
+        <div class="takeaway-big">92</div>
+        <div class="takeaway-pct">%</div>
+      </div>
+      <div class="takeaway-text">of hiring managers say soft skills are equally or more important than technical skills — and every single thing you wrote in this journal today is a soft skill an employer is actively looking for.</div>
+      <div class="takeaway-quote">You are not starting from scratch.<br>You are starting from experience.</div>
+    </div>
+  </div>
+
+</div>
